@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Example</title>
+</head>
+<body>
+    <h1>Chat with ChatGPT</h1>
+    
+    <div id="chat-container">
+        <div id="chat-log"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button id="send-button">Send</button>
+    </div>
+
+    <script>
+        const apiKey = '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'; // Replace with your ChatGPT API key
+        const chatLog = document.getElementById('chat-log');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        // Function to add a message to the chat log
+        function appendMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = sender === 'user' ? 'user-message' : 'chatbot-message';
+            messageDiv.innerText = message;
+            chatLog.appendChild(messageDiv);
+        }
+
+        // Function to send a user message to ChatGPT and receive a response
+        async function sendMessageToChatGPT(message) {
+            appendMessage(message, 'user');
+            userInput.value = '';
+
+            // Call the ChatGPT API
+            const response = await fetch('https://api.openai.com/v1/engines/davinci-codex/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                },
+                body: JSON.stringify({
+                    prompt: message,
+                    max_tokens: 50, // You can adjust this for response length
+                }),
+            });
+
+            const data = await response.json();
+            const chatbotResponse = data.choices[0].text;
+            appendMessage(chatbotResponse, 'chatbot');
+        }
+
+        // Event listener for the send button
+        sendButton.addEventListener('click', () => {
+            const userMessage = userInput.value.trim();
+            if (userMessage !== '') {
+                sendMessageToChatGPT(userMessage);
+            }
+        });
+
+        // Event listener for pressing Enter key
+        userInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+    </script>
+
+    <style>
+        /* Add your CSS styles here for the chat interface */
+    </style>
+</body>
+</html>
